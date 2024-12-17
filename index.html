@@ -128,6 +128,12 @@
     .expand-collapse-btn:hover {
       background-color: #e2e6ea;
     }
+
+    /* Change text color to red and menu color to red when hovering over the specific task or subtask */
+    li:hover > .task-text,
+    li:hover > .menu {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +179,7 @@
       // Item text
       const textSpan = document.createElement('span');
       textSpan.textContent = item.text;
+      textSpan.className = 'task-text';  // Add class for styling
       li.appendChild(textSpan);
 
       // Three-dot menu
