@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Checklist</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 32px;
+      color: #007bff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+    ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+    li {
+      margin: 8px 0;
+      position: relative;
+      padding-left: 30px;
+      font-size: 16px;
+    }
+    li input[type="checkbox"] {
+      margin-right: 12px;
+    }
+    .toggle-btn {
+      font-size: 20px;
+      cursor: pointer;
+      margin-right: 12px;
+      color: #007bff;
+      transition: all 0.3s ease;
+    }
+    .toggle-btn:hover {
+      color: #0056b3;
+    }
+    .menu {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #007bff;
+    }
+    .menu-options {
+      display: none;
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: 160px;
+      z-index: 1000;
+    }
+    .menu-options div {
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .menu-options div:hover {
+      background-color: #f0f0f0;
+    }
+    .notes {
+      margin-top: 12px;
+      background-color: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #555;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+      word-wrap: break-word; /* Ensures text wraps properly */
+      overflow-wrap: break-word; /* Prevents overflow */
+      max-width: 100%; /* Keeps notes within the container */
+    }
+    span {
+      word-wrap: break-word; /* Ensures long text wraps correctly */
+      overflow-wrap: break-word; /* Prevents overflow issues */
+      max-width: 90%; /* Limits text width to prevent breaking layout */
+      display: inline-block; /* Ensures inline behavior with wrapping */
+    }
+    .progress {
+      margin: 20px 0;
+      font-weight: bold;
+      font-size: 18px;
+      color: #333;
+    }
+    .progress span {
+      font-size: 22px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    button {
+      display: inline-block;
+      margin: 12px 5px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    button:active {
+      background-color: #004085;
+    }
+    .expand-collapse-btn {
+      font-size: 16px;
+      font-weight: bold;
+      color: #007bff;
+      background-color: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .expand-collapse-btn:hover {
+      background-color: #e2e6ea;
+    }
+  </style>
+</head>
+<body>
+  <h1>Advanced Checklist Tool By Anand_joshi</h1>
+  <div class="container">
+    <div class="progress">Progress: <span id="progress-text">0%</span></div>
+    <ul id="checklist"></ul>
+    <button onclick="addMainItem()">Add Main Topic</button>
+    <button onclick="saveToFile()">Save</button>
+    <button onclick="loadFromFile()">Load</button>
+  </div>
+
+  <script>
+    let checklist = JSON.parse(localStorage.getItem('advancedChecklist')) || [];
+
+    function renderChecklist() {
+      const checklistContainer = document.getElementById('checklist');
+      checklistContainer.innerHTML = '';
+      checklist.forEach((item, index) => {
+        checklistContainer.appendChild(createListItem(item, [index]));
+      });
+      updateProgress();
+      saveToLocal();
+    }
+
+    function createListItem(item, path) {
+      const li = document.createElement('li');
+
+      // Expand/Collapse button
+      const toggleBtn = document.createElement('span');
+      toggleBtn.textContent = item.subItems && item.subItems.length > 0 ? (item.collapsed ? '+' : '-') : '';
+      toggleBtn.className = 'toggle-btn';
+      toggleBtn.onclick = () => toggleCollapse(path);
+      li.appendChild(toggleBtn);
+
+      // Checkbox
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = item.checked;
+      checkbox.onchange = () => toggleCheck(path);
+      li.appendChild(checkbox);
+
+      // Item text
+      const textSpan = document.createElement('span');
+      textSpan.textContent = item.text;
+      li.appendChild(textSpan);
+
+      // Three-dot menu
+      const menu = document.createElement('span');
+      menu.textContent = '⋮';
+      menu.className = 'menu';
+      li.appendChild(menu);
+
+      // Menu options
+      const menuOptions = document.createElement('div');
+      menuOptions.className = 'menu-options';
+      menu.appendChild(menuOptions);
+
+      const addOption = document.createElement('div');
+      addOption.textContent = 'Add Subtopic';
+      addOption.onclick = () => addSubItem(path);
+      menuOptions.appendChild(addOption);
+
+      const editOption = document.createElement('div');
+      editOption.textContent = 'Edit';
+      editOption.onclick = () => editItem(path);
+      menuOptions.appendChild(editOption);
+
+      const removeOption = document.createElement('div');
+      removeOption.textContent = 'Remove';
+      removeOption.onclick = () => removeItem(path);
+      menuOptions.appendChild(removeOption);
+
+      const addNotesOption = document.createElement('div');
+      addNotesOption.textContent = 'Add Notes';
+      addNotesOption.onclick = () => addNotes(path);
+      menuOptions.appendChild(addNotesOption);
+
+      menu.onclick = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.menu-options').forEach(menu => menu.style.display = 'none');
+        menuOptions.style.display = 'block';
+      };
+
+      document.addEventListener('click', () => menuOptions.style.display = 'none');
+
+      // Notes (only visible when expanded)
+      if (!item.collapsed && item.notes && item.notes.trim()) {
+        const notes = document.createElement('div');
+        notes.className = 'notes';
+        notes.textContent = item.notes;
+        li.appendChild(notes);
+      }
+
+      // Sub-items (if any)
+      if (item.subItems && item.subItems.length > 0 && !item.collapsed) {
+        const ul = document.createElement('ul');
+        item.subItems.forEach((subItem, subIndex) => {
+          ul.appendChild(createListItem(subItem, [...path, subIndex]));
+        });
+        li.appendChild(ul);
+      }
+
+      return li;
+    }
+
+    function toggleCollapse(path) {
+      let current = checklist;
+      path.forEach((index, i) => {
+        if (i === path.length - 1) {
+          current[index].collapsed = !current[index].collapsed;
+        } else {
+          current = current[index].subItems;
+        }
+      });
+      renderChecklist();
+    }
+
+    function toggleCheck(path) {
+      let current = checklist;
+      path.forEach((index, i) => {
+        if (i === path.length - 1) {
+          current[index].checked = !current[index].checked;
+        } else {
+          current = current[index].subItems;
+        }
+      });
+      renderChecklist();
+    }
+
+    function addMainItem() {
+      const text = prompt('Enter main topic:');
+      if (text) checklist.push({ text, checked: false, collapsed: false, subItems: [], notes: '' });
+      renderChecklist();
+    }
+
+    function addSubItem(path) {
+      const text = prompt('Enter subtopic:');
+      if (text) {
+        let current = checklist;
+        path.forEach(index => current = current[index].subItems);
+        current.push({ text, checked: false, collapsed: false, subItems: [], notes: '' });
+        renderChecklist();
+      }
+    }
+
+    function editItem(path) {
+      const text = prompt('Edit item:');
+      if (text) {
+        let current = checklist;
+        path.forEach((index, i) => {
+          if (i === path.length - 1) current[index].text = text;
+          else current = current[index].subItems;
+        });
+        renderChecklist();
+      }
+    }
+
+    function removeItem(path) {
+      if (confirm('Are you sure you want to remove this item?')) {
+        let current = checklist;
+        path.forEach((index, i) => {
+          if (i === path.length - 1) current.splice(index, 1);
+          else current = current[index].subItems;
+        });
+        renderChecklist();
+      }
+    }
+
+    function addNotes(path) {
+      const notes = prompt('Enter notes for this topic:');
+      if (notes !== null) {
+        let current = checklist;
+        path.forEach((index, i) => {
+          if (i === path.length - 1) current[index].notes = notes;
+          else current = current[index].subItems;
+        });
+        renderChecklist();
+      }
+    }
+
+    function updateProgress() {
+      const total = getTotalTasks(checklist);
+      const completed = getCompletedTasks(checklist);
+      const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+      document.getElementById('progress-text').textContent = `${percentage}%`;
+    }
+
+    function getTotalTasks(items) {
+      return items.reduce((total, item) => total + 1 + getTotalTasks(item.subItems || []), 0);
+    }
+
+    function getCompletedTasks(items) {
+      return items.reduce((completed, item) => completed + (item.checked ? 1 : 0) + getCompletedTasks(item.subItems || []), 0);
+    }
+
+    function saveToLocal() {
+      localStorage.setItem('advancedChecklist', JSON.stringify(checklist));
+    }
+
+    function saveToFile() {
+      const blob = new Blob([JSON.stringify(checklist)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'checklist.json';
+      link.click();
+    }
+
+    function loadFromFile() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          checklist = JSON.parse(reader.result);
+          renderChecklist();
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    renderChecklist();
+  </script>
+</body>
+</html>
