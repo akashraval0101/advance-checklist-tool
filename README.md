@@ -16,7 +16,8 @@ This is an advanced checklist tool that allows users to manage tasks and subtask
   
 ## Installation
 
-- **USE DIRECT BY VISITING HERE**: https://akashraval0101.github.io/advance-checklist-tool/
+- **USE DIRECTLY BY VISITING HERE**: https://akashraval0101.github.io/advance-checklist-tool/
+
   OR
 1. Download or clone the repository.
 2. Open the `index.html` file in your browser to use the tool.
