@@ -85,15 +85,6 @@
       font-size: 14px;
       color: #555;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
-      word-wrap: break-word; /* Ensures text wraps properly */
-      overflow-wrap: break-word; /* Prevents overflow */
-      max-width: 100%; /* Keeps notes within the container */
-    }
-    span {
-      word-wrap: break-word; /* Ensures long text wraps correctly */
-      overflow-wrap: break-word; /* Prevents overflow issues */
-      max-width: 90%; /* Limits text width to prevent breaking layout */
-      display: inline-block; /* Ensures inline behavior with wrapping */
     }
     .progress {
       margin: 20px 0;
@@ -140,7 +131,7 @@
   </style>
 </head>
 <body>
-  <h1>Advanced Checklist Tool By Akash_Raval</h1>
+  <h1>Advanced Checklist Tool By Anand_joshi</h1>
   <div class="container">
     <div class="progress">Progress: <span id="progress-text">0%</span></div>
     <ul id="checklist"></ul>
@@ -214,6 +205,16 @@
       addNotesOption.textContent = 'Add Notes';
       addNotesOption.onclick = () => addNotes(path);
       menuOptions.appendChild(addNotesOption);
+
+      const moveUpOption = document.createElement('div');
+      moveUpOption.textContent = 'Move Up';
+      moveUpOption.onclick = () => moveItemUp(path);
+      menuOptions.appendChild(moveUpOption);
+
+      const moveDownOption = document.createElement('div');
+      moveDownOption.textContent = 'Move Down';
+      moveDownOption.onclick = () => moveItemDown(path);
+      menuOptions.appendChild(moveDownOption);
 
       menu.onclick = (e) => {
         e.stopPropagation();
@@ -316,6 +317,36 @@
         });
         renderChecklist();
       }
+    }
+
+    function moveItemUp(path) {
+      if (path.length > 0) {
+        let current = checklist;
+        path.forEach((index, i) => {
+          if (i === path.length - 1) {
+            if (index > 0) {
+              [current[index], current[index - 1]] = [current[index - 1], current[index]];
+            }
+          } else {
+            current = current[index].subItems;
+          }
+        });
+        renderChecklist();
+      }
+    }
+
+    function moveItemDown(path) {
+      let current = checklist;
+      path.forEach((index, i) => {
+        if (i === path.length - 1) {
+          if (index < current.length - 1) {
+            [current[index], current[index + 1]] = [current[index + 1], current[index]];
+          }
+        } else {
+          current = current[index].subItems;
+        }
+      });
+      renderChecklist();
     }
 
     function updateProgress() {
