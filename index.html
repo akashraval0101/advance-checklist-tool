@@ -235,7 +235,7 @@
       if (!item.collapsed && item.notes && item.notes.trim()) {
         const notes = document.createElement('div');
         notes.className = 'notes';
-        notes.textContent = item.notes;
+        notes.innerHTML = item.notes;  // Use innerHTML to render the <br> tags
         li.appendChild(notes);
       }
 
@@ -317,9 +317,12 @@
     function addNotes(path) {
       const notes = prompt('Enter notes for this topic:');
       if (notes !== null) {
+        // Replace "\n" with HTML line break "<br>" to preserve newlines in the display
+        const formattedNotes = notes.replace(/\n/g, '<br>');
+        
         let current = checklist;
         path.forEach((index, i) => {
-          if (i === path.length - 1) current[index].notes = notes;
+          if (i === path.length - 1) current[index].notes = formattedNotes;
           else current = current[index].subItems;
         });
         renderChecklist();
